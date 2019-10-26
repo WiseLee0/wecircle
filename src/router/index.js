@@ -5,13 +5,29 @@ const Login = (resolve) => {
     resolve(module)
   })
 }
+const Publish = (resolve) => {
+  import('@views/publish/index').then((module) => {
+    resolve(module)
+  })
+}
+const Wecircle = (resolve) => {
+  import('@views/wecircle/index').then((module) => {
+    resolve(module)
+  })
+}
 Vue.use(Router)
 export default new Router({
   routes: [{
     path: '/',
-    redirect: '/login'
+    redirect: '/wecircle'
   }, {
     path: '/login',
     component: Login
+  }, {
+    path: '/publish',
+    component: Publish
+  }, {
+    path: '/wecircle',
+    component: Wecircle
   }]
 })
