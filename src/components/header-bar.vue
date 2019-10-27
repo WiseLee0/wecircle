@@ -2,7 +2,8 @@
   <div class="header-bar"
        :class="headerClass">
     <p class="title">Wecircle</p>
-    <i class="cubeic-camera"></i>
+    <i class="cubeic-camera"
+       @click="toPublish"></i>
   </div>
 </template>
 
@@ -14,6 +15,11 @@ export default {
       default: ''
     }
   },
+  methods: {
+    toPublish () {
+      this.$emit('toPublish')
+    }
+  },
 }
 </script>
 
@@ -22,7 +28,7 @@ export default {
   height 57px
   position fixed
   width 100%
-  transition all 400ms
+  transition all 0.4s
   z-index 100
   top 0
   left 0
@@ -38,9 +44,12 @@ export default {
   .cubeic-camera
     font-size 24px
     position absolute
-    right 17px
-    top 16px
+    right 12px
+    top 11px
     color #fff
+    padding 5px
+    border-radius 50%
+    background-color rgba(255, 255, 255, 0.2)
 .header-bar::after
   display none
 .header-bar.show::after
@@ -52,4 +61,5 @@ export default {
   display block
 .header-bar.show .cubeic-camera
   color #000
+  background-color rgba(0, 0, 0, 0.1)
 </style>

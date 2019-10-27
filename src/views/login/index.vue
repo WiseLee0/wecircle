@@ -112,6 +112,7 @@ export default {
         avatar: avatarUrl.data.result[0].picUrl || '',
         bgUrl: avatarUrl.data.result[1].picUrl || ''
       })
+      this._getUserMsg(res.token)
       toast.hide()
       this._toast(res, '登录')
       if (res.code !== 0) return
@@ -119,7 +120,6 @@ export default {
         this.$router.push({
           path: '/wecircle'
         })
-        this.set_token(res.token)
       }, 500)
     },
     /**
@@ -161,8 +161,17 @@ export default {
       })
       toast.show()
     },
+    /**
+     * 获取用户信息,存储vuex
+     */
+    async _getUserMsg (token) {
+      const res = await service.get('/user/msg', {}, token)
+      this.set_user(res.data)
+      this.set_token(token)
+    },
     ...mapMutations({
-      'set_token': 'SET_TOKEN'
+      'set_token': 'SET_TOKEN',
+      'set_user': 'SET_USER'
     })
   }
 }

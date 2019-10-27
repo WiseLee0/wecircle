@@ -1,52 +1,23 @@
 <template>
   <div class="wecircle">
-    <header-bar :headerClass="headerClass"></header-bar>
+    <header-bar :headerClass="headerClass"
+                @toPublish="toPublish"></header-bar>
     <cube-scroll ref="scroll"
+                 :options="options"
                  :scroll-events="scrollEvents"
                  @scroll="onScroll">
-      <img src="http://p.qpic.cn/music_cover/fGXwMYtCWNFSaEaFYicbqtYnXwPpSPEPws5nvOQLSmG4VWMibVAibdG6w/600?n=1"
-           class="bg-img">
+      <img :src="user.bgUrl"
+           class="bg-img"
+           ref="bgImg">
+      <div class="mask"></div>
       <div class="name-info">
-        <p class="nickname">随时随地</p>
+        <p class="nickname">{{user.nickname}}</p>
         <img class="avatar"
-             src="http://p.qpic.cn/music_cover/fGXwMYtCWNFSaEaFYicbqtYnXwPpSPEPws5nvOQLSmG4VWMibVAibdG6w/600?n=1">
+             :src="user.avatar">
       </div>
-      <div>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
-        <p>123</p>
+      <div v-for="card in list"
+           :key="card.id">
+        <list-card :card="card"></list-card>
       </div>
     </cube-scroll>
   </div>
@@ -55,35 +26,39 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex'
 import headerBar from '@components/header-bar'
+import listCard from '@components/list-card'
 import service from '@utils/service'
 export default {
   data () {
     return {
       scrollEvents: ['scroll'],
-      headerClass: ''
+      headerClass: '',
+      options: {
+        bounce: false
+      },
+      list: []
     }
   },
   computed: {
-    ...mapGetters(['token'])
+    ...mapGetters(['token', 'user'])
   },
   created () {
-    this._getUserMsg()
+    this.getUserMsg()
   },
   methods: {
     /**
-     * 获取用户信息
+     * 获取信息
      */
-    async _getUserMsg () {
-      const res = await service.get('/user/msg', {}, this.token)
-      if (res.code === 0) {
-        console.log(res.data)
-      } else {
-        if (this.token.length) {
-          this.delete_token()
-        } else {
-          console.log(123)
-        }
+    async getUserMsg () {
+      if (this.token.length) {
+        this._getApiMsg()
       }
+      const res = await service.get('/publish/article/1')
+      res.forEach(element => {
+        element.picList = element.picList.split(',')
+      })
+      console.log(res)
+      this.list = res
     },
     /**
      * 发布动态
@@ -99,22 +74,38 @@ export default {
         })
       }
     },
+    /**
+    * 滚动事件
+    */
     onScroll ({ y }) {
-      if (-y >= 100) {
-        this.headerClass = 'show'
-      } else {
-        this.headerClass = ''
-      }
+      if (-y >= 150) this.headerClass = 'show'
+      else this.headerClass = ''
+
+      if (-y >= 57) this.$refs.bgImg.style.filter = 'blur(2px)'
+      else this.$refs.bgImg.style.filter = 'blur(0px)'
+    },
+    /**
+     * 用户信息获取请求
+     */
+    async _getApiMsg () {
+      const res = await service.get('/user/msg', {}, this.token)
+      if (res.code === 0) this.set_user(res.data)
+      else
+        // token 过期删除令牌
+        if (this.token.length) this.delete_token()
+
     },
     /**
      * vuex
      */
     ...mapMutations({
-      'delete_token': 'DELETE_TOKEN'
+      'delete_token': 'DELETE_TOKEN',
+      'set_user': 'SET_USER'
     })
   },
   components: {
     headerBar,
+    listCard
   },
 }
 </script>
@@ -130,6 +121,13 @@ export default {
   .bg-img
     height 320px
     width 100%
+  .mask
+    height 320px
+    background-color rgba(0, 0, 0, 0.3)
+    position absolute
+    top 0
+    left 0
+    right 0
   .name-info
     position absolute
     right 12px

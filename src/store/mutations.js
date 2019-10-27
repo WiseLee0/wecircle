@@ -8,6 +8,9 @@ const mutations = {
   [types.DELETE_TOKEN] (state) {
     deleteToken()
     state.token = ''
+  },
+  [types.SET_USER] (state, user) {
+    state.user = user
   }
 }
 export default mutations
