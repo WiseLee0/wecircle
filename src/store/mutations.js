@@ -11,6 +11,13 @@ const mutations = {
   },
   [types.SET_USER] (state, user) {
     state.user = user
+  },
+  [types.SET_LIST] (state, list) {
+    list.forEach(element => {
+      element.picList = element.picList.split(',')
+      element.created_at = new Date(element.created_at)
+    })
+    state.list = list
   }
 }
 export default mutations

@@ -17,7 +17,6 @@
     </div>
     <div class="bottom">
       <cube-upload ref="upload"
-                   :simultaneous-uploads="1"
                    :max="8"
                    :action="action"
                    @files-added="filesAdded"
@@ -32,7 +31,7 @@
 <script>
 import compress from '@utils/compress'
 import service from '@utils/service'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -50,7 +49,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['token'])
+    ...mapGetters(['token', 'user'])
   },
   methods: {
     /** 
@@ -110,10 +109,16 @@ export default {
       if (this.$refs.upload.files.length === this.picList.length) {
         let res = await service.post('/publish', {
           content: this.content,
-          picList: this.picList.toString()
+          picList: this.picList.toString(),
+          avatar: this.user.avatar,
+          nickname: this.user.nickname
         }, this.token)
+        // 刷新vuex列表数据
+        const data = await service.get('/publish/article/1')
+        this.set_list(data)
         this.showToast.hide()
         this._toast(res, '发布')
+        // 清除数据
         this._clearData()
         setTimeout(() => {
           this.$router.replace({
@@ -167,7 +172,10 @@ export default {
         txt
       })
       toast.show()
-    }
+    },
+    ...mapMutations({
+      'set_list': 'SET_LIST'
+    })
   }
 }
 </script>

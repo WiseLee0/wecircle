@@ -1,6 +1,7 @@
 <template>
-  <div class="list-card">
-    <img src="https://wecircle-1258512819.cos.ap-beijing.myqcloud.com/imgs/1572141543687-608248.jpeg"
+  <div class="list-card border-bottom-1px"
+       @click="closeTip">
+    <img :src="card.avatar"
          class="avatar">
     <div class="container">
       <p class="nickname">{{card.nickname}}</p>
@@ -17,6 +18,38 @@
              @click="handleImgsClick(index)"
              :class="card.picList.length===1?'imgOne':'img'">
       </div>
+      <div class="msg-tip">
+        <span class="msg-time">{{leaveNow}}</span>
+        <cube-tip ref="tip"
+                  direction="right"
+                  style="right:60px;"
+                  class="tip"
+                  @click="$refs.tip.show()">
+          <div class="tip-box">
+            <div class="tip-like"
+                 @click.stop="onLike">
+              <i class="cubeic-like icon"></i>赞
+            </div>
+            <div class="line border-right-1px"></div>
+            <div class="tip-comment"
+                 @click.stop="onComment">
+              <i class="cubeic-message icon"></i>评论
+            </div>
+          </div>
+        </cube-tip>
+        <i class="cubeic-more"
+           @click.stop="showTip"></i>
+      </div>
+      <div class="comment-list">
+        <div class="like-content">
+          <i class="cubeic-like"></i>
+          <span class="like-nickname">张小凡</span>
+        </div>
+        <div class="comment-item border-top-1px">
+          <div class="comment-nickname">随时随地</div>
+          <div>以及上下左右四个边框的绝对 1px 边框的 class</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -29,10 +62,25 @@ export default {
       default: () => { }
     }
   },
+  computed: {
+    leaveNow () {
+      var mistiming = Math.round((Date.now() - new Date(this.card.created_at)) / 1000)
+      const arrr = ['年', '个月', '星期', '天', '小时', '分钟', '秒']
+      const arrn = [31536000, 2592000, 604800, 86400, 3600, 60, 1]
+      for (var i = 0; i < arrn.length; i++) {
+        var inm = Math.floor(mistiming / arrn[i]);
+        if (inm != 0) {
+          return inm + arrr[i] + '前';
+        }
+      }
+      return 'error'
+    }
+  },
   data () {
     return {
       overText: '展开',
       overFlag: true,
+      tipFlag: false,
       initialIndex: 0
     }
   },
@@ -63,12 +111,35 @@ export default {
         }
       }
       this.$createImagePreview({ ...params }).show()
+    },
+    /**
+     * 点赞
+     */
+    onLike () {
+      console.log(123)
+      this.closeTip()
+    },
+    /**
+     * 评论
+     */
+    onComment () {
+      console.log(456)
+      this.closeTip()
+    },
+    showTip () {
+      if (this.tipFlag) this.$refs.tip.hide()
+      else this.$refs.tip.show()
+      this.tipFlag = !this.tipFlag
+    },
+    closeTip () {
+      this.$refs.tip.hide()
+      this.tipFlag = false
     }
   }
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="stylus">
 @import '~@/myColor'
 .list-card
   padding 15px 10px
@@ -122,4 +193,88 @@ export default {
       .imgOne
         max-width 200px
         max-height 200px
+    .msg-tip
+      padding-top 10px
+      display flex
+      flex-direction row
+      justify-content space-between
+      height 24px
+      align-items center
+      .msg-time
+        font-size 14px
+        color $font-gray
+        font-family 'Courier New', Courier, monospace
+      .tip
+        padding 5px 5px 5px 0
+        .cube-tip-close
+          display none
+        .tip-box
+          width 160px
+          height 20px
+          display flex
+          flex-direction row
+          .line
+            width 2px
+            height 20px
+          .tip-like, .tip-comment
+            width 79px
+            height 20px
+            font-size 14px
+            font-family 'Courier New', Courier, monospace
+            line-height 20px
+            text-align center
+          .icon
+            color rgba(255, 255, 255, 0.5)
+            margin-right 5px
+      .cubeic-more
+        font-size 22px
+        padding 0 10px
+        border-radius 25px
+        background-color #f7f7f7
+    .comment-list
+      font-size 14px
+      background-color rgb(243, 243, 243)
+      margin-top 9px
+      margin-bottom 5px
+      position relative
+      .like-content
+        padding-top 3px
+        padding-bottom 3px
+        padding-left 8px
+        padding-right 8px
+        text-align left
+        word-break break-all
+        .cubeic-like
+          margin-right 4px
+          margin-top 4px
+          font-size 14px
+          color pink
+        .like-nickname
+          color rgb(87, 107, 149)
+          font-weight 500
+      .comment-item
+        padding 3px 5px 3px 8px
+        text-align left
+        word-break break-word
+        min-height 24px
+        line-height 18px
+        .comment-nickname
+          color rgb(87, 107, 149)
+          max-width 130px
+          float left
+          font-weight 500
+          margin-right 5px
+          overflow hidden
+          text-overflow ellipsis
+          white-space nowrap
+    .comment-list::before
+      content ''
+      position absolute
+      left 8px
+      top -9px
+      width 0
+      height 0
+      border-right 5px solid transparent
+      border-left 5px solid transparent
+      border-bottom 10px solid rgb(243, 243, 243)
 </style>

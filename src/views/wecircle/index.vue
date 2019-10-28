@@ -3,22 +3,36 @@
     <header-bar :headerClass="headerClass"
                 @toPublish="toPublish"></header-bar>
     <cube-scroll ref="scroll"
+                 :data="list"
                  :options="options"
                  :scroll-events="scrollEvents"
                  @scroll="onScroll">
-      <img :src="user.bgUrl"
-           class="bg-img"
-           ref="bgImg">
-      <div class="mask"></div>
-      <div class="name-info">
-        <p class="nickname">{{user.nickname}}</p>
-        <img class="avatar"
-             :src="user.avatar">
-      </div>
-      <div v-for="card in list"
-           :key="card.id">
-        <list-card :card="card"></list-card>
-      </div>
+      <pull-refresh @onRefresh="getList">
+        <cube-upload ref="upload"
+                     v-model="files"
+                     :max="1"
+                     :action="action"
+                     @files-added="filesAdded"
+                     @file-submitted="fileSubmitted"
+                     @file-success="fileSuccess"
+                     :process-file="processFile">
+          <img :src="user.bgUrl"
+               class="bg-img border-bottom-1px"
+               ref="bgImg">
+          <cube-upload-btn :multiple="false"
+                           class="mask">
+          </cube-upload-btn>
+        </cube-upload>
+        <div class="name-info">
+          <p class="nickname">{{user.nickname}}</p>
+          <img class="avatar"
+               :src="user.avatar">
+        </div>
+        <div v-for="card in list"
+             :key="card.id">
+          <list-card :card="card"></list-card>
+        </div>
+      </pull-refresh>
     </cube-scroll>
   </div>
 </template>
@@ -27,38 +41,57 @@
 import { mapGetters, mapMutations } from 'vuex'
 import headerBar from '@components/header-bar'
 import listCard from '@components/list-card'
+import pullRefresh from '@components/pull-refresh'
 import service from '@utils/service'
+import compress from '@utils/compress'
 export default {
   data () {
     return {
       scrollEvents: ['scroll'],
       headerClass: '',
       options: {
-        bounce: false
+        bounce: true
       },
-      list: []
+      files: [],
+      action: {
+        target: service.baseURL + '/publish/image',
+        prop: 'base64Value'
+      },
+      showToast: null,
+      touch: {
+        y: 0,
+        percent: 0
+      },
+      isTop: true
     }
   },
   computed: {
-    ...mapGetters(['token', 'user'])
+    ...mapGetters(['token', 'user', 'list'])
   },
   created () {
-    this.getUserMsg()
+    this._getUserMsg()
+    this.getList()
   },
   methods: {
     /**
-     * 获取信息
+     * 获取用户信息
      */
-    async getUserMsg () {
+    async _getUserMsg () {
       if (this.token.length) {
-        this._getApiMsg()
+        const res = await service.get('/user/msg', {}, this.token)
+        if (res.code === 0) this.set_user(res.data)
+        else
+          // token 过期删除令牌
+          if (this.token.length) this.delete_token()
       }
+    },
+    /**
+     * 获取朋友圈动态
+     */
+    async getList () {
       const res = await service.get('/publish/article/1')
-      res.forEach(element => {
-        element.picList = element.picList.split(',')
-      })
-      console.log(res)
-      this.list = res
+      this.set_list(res)
+      console.log(this.list)
     },
     /**
      * 发布动态
@@ -78,6 +111,8 @@ export default {
     * 滚动事件
     */
     onScroll ({ y }) {
+      if (y == 0) this.isTop = true
+      else this.isTop = false
       if (-y >= 150) this.headerClass = 'show'
       else this.headerClass = ''
 
@@ -85,38 +120,108 @@ export default {
       else this.$refs.bgImg.style.filter = 'blur(0px)'
     },
     /**
-     * 用户信息获取请求
-     */
-    async _getApiMsg () {
-      const res = await service.get('/user/msg', {}, this.token)
-      if (res.code === 0) this.set_user(res.data)
-      else
-        // token 过期删除令牌
-        if (this.token.length) this.delete_token()
+    * 返回图片地址
+    */
+    async fileSuccess (file) {
+      const bgUrl = 'https://' + file.response
+      const res = await service.post('/user/change', {
+        bgUrl
+      }, this.token)
+      this.showToast.hide()
+      if (res.code === 0) {
+        this.showToast = this.$createToast({
+          time: 1000,
+          type: 'correct',
+          txt: '更改成功'
+        })
+        this.showToast.show()
+        this._getUserMsg()
+      }
+    },
+    /**
+    * 实现文件过滤
+    */
+    filesAdded (files) {
+      this.showToast = this.$createToast({
+        time: 0,
+        txt: '正在修改中~~'
+      })
+      if (this.files[0] && this.files[0].status == 'success') {
+        this.showToast.hide()
+        this.showToast = this.$createToast({
+          type: 'error',
+          time: 1000,
+          txt: '修改过了,以后在试~~'
+        })
+      }
+      this.showToast.show()
 
+      let hasIgnore = false
+      let txt = ''
+      const maxSize = 10 * 1024 * 1024
+      for (let k in files) {
+        const file = files[k]
+        if (file.size > maxSize) {
+          file.ignore = true
+          hasIgnore = true
+          txt = '图片太大~~'
+        }
+      }
+      hasIgnore && this.$createToast({
+        type: 'warn',
+        time: 1000,
+        txt
+      }).show()
+    },
+    /**
+     * 图片压缩
+     */
+    processFile (file, next) {
+      compress(file, {
+        compress: {
+          width: 400,
+          height: 400,
+          quality: 0.8
+        }
+      }, next)
+    },
+    /**
+     * 添加base64
+     */
+    fileSubmitted (file) {
+      file.base64Value = file.file.base64
     },
     /**
      * vuex
      */
     ...mapMutations({
       'delete_token': 'DELETE_TOKEN',
-      'set_user': 'SET_USER'
+      'set_user': 'SET_USER',
+      'set_list': 'SET_LIST'
     })
+  },
+  watch: {
+    list () {
+      setTimeout(() => {
+        this.$refs.scroll.refresh()
+      }, 300)
+    }
   },
   components: {
     headerBar,
-    listCard
+    listCard,
+    pullRefresh
   },
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="stylus">
 @import '~@/myColor'
 .wecircle
   position fixed
   left 0
   right 0
-  top 0
+  top -50px
   bottom 0
   .bg-img
     height 320px
@@ -128,6 +233,8 @@ export default {
     top 0
     left 0
     right 0
+    .cube-upload-btn-def
+      opacity 0
   .name-info
     position absolute
     right 12px

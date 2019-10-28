@@ -1,5 +1,5 @@
 <template>
-  <div class="header-bar"
+  <div class="header-bar border-bottom-1px"
        :class="headerClass">
     <p class="title">Wecircle</p>
     <i class="cubeic-camera"
