@@ -28,9 +28,10 @@
           <img class="avatar"
                :src="user.avatar">
         </div>
-        <div v-for="card in list"
+        <div v-for="(card,index) in list"
              :key="card.id">
-          <list-card :card="card"></list-card>
+          <list-card :card="card"
+                     :index="index"></list-card>
         </div>
       </pull-refresh>
     </cube-scroll>

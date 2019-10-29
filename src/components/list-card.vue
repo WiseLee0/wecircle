@@ -28,7 +28,11 @@
           <div class="tip-box">
             <div class="tip-like"
                  @click.stop="onLike">
-              <i class="cubeic-like icon"></i>赞
+              <i class="cubeic-like icon"
+                 :style="likeFlag?'color:pink':'color:rgba(255, 255, 255, 0.5)'"></i>
+              <span v-show="!likeFlag">赞</span>
+              <span v-show="likeFlag"
+                    style="color:pink">取消</span>
             </div>
             <div class="line border-right-1px"></div>
             <div class="tip-comment"
@@ -41,9 +45,12 @@
            @click.stop="showTip"></i>
       </div>
       <div class="comment-list">
-        <div class="like-content">
+        <div class="like-content"
+             v-show="card.like.length">
           <i class="cubeic-like"></i>
-          <span class="like-nickname">张小凡</span>
+          <span class="like-nickname"
+                v-for="likeName in card.like"
+                :key="likeName">{{likeName}} </span>
         </div>
         <div class="comment-item border-top-1px">
           <div class="comment-nickname">随时随地</div>
@@ -55,11 +62,17 @@
 </template>
 
 <script>
+import service from '@utils/service'
+import { mapGetters, mapMutations } from 'vuex'
 export default {
   props: {
     card: {
       type: Object,
       default: () => { }
+    },
+    index: {
+      type: Number,
+      default: 0
     }
   },
   computed: {
@@ -70,18 +83,21 @@ export default {
       for (var i = 0; i < arrn.length; i++) {
         var inm = Math.floor(mistiming / arrn[i]);
         if (inm != 0) {
+          if (arrr[i] == '天' && inm == 1) return '昨天'
           return inm + arrr[i] + '前';
         }
       }
       return 'error'
-    }
+    },
+    ...mapGetters(['token', 'user'])
   },
   data () {
     return {
       overText: '展开',
       overFlag: true,
       tipFlag: false,
-      initialIndex: 0
+      initialIndex: 0,
+      likeFlag: false
     }
   },
   methods: {
@@ -115,8 +131,25 @@ export default {
     /**
      * 点赞
      */
-    onLike () {
-      console.log(123)
+    async onLike () {
+      if (!this.likeFlag) {
+        await service.post('/like', {
+          articleId: this.card.id
+        }, this.token)
+        this.set_like({
+          index: this.index,
+          nickname: this.user.nickname
+        })
+      } else {
+        await service.post('/dislike', {
+          articleId: this.card.id
+        }, this.token)
+        this.set_dislike({
+          index: this.index,
+          nickname: this.user.nickname
+        })
+      }
+      this.likeFlag = !this.likeFlag
       this.closeTip()
     },
     /**
@@ -126,7 +159,14 @@ export default {
       console.log(456)
       this.closeTip()
     },
+    /**
+     * 展开tip
+     */
     showTip () {
+      this.card.like.forEach(item => {
+        if (item === this.user.nickname) this.likeFlag = true
+        else this.likeFlag = false
+      })
       if (this.tipFlag) this.$refs.tip.hide()
       else this.$refs.tip.show()
       this.tipFlag = !this.tipFlag
@@ -134,7 +174,11 @@ export default {
     closeTip () {
       this.$refs.tip.hide()
       this.tipFlag = false
-    }
+    },
+    ...mapMutations({
+      'set_like': "SET_LIKE",
+      'set_dislike': "SET_DISLIKE"
+    })
   }
 }
 </script>
