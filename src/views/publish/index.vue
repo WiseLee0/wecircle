@@ -17,7 +17,7 @@
     </div>
     <div class="bottom">
       <cube-upload ref="upload"
-                   :max="8"
+                   :max="9"
                    :action="action"
                    @files-added="filesAdded"
                    @file-submitted="fileSubmitted"
@@ -29,10 +29,11 @@
 </template>
 
 <script>
-import compress from '@utils/compress'
+import { ImgMixin } from '@utils/mixin'
 import service from '@utils/service'
 import { mapGetters, mapMutations } from 'vuex'
 export default {
+  mixins: [ImgMixin],
   data () {
     return {
       action: {
@@ -111,7 +112,8 @@ export default {
           content: this.content,
           picList: this.picList.toString(),
           avatar: this.user.avatar,
-          nickname: this.user.nickname
+          nickname: this.user.nickname,
+          vip: this.user.vip
         }, this.token)
         // 刷新vuex列表数据
         const data = await service.get('/publish/article/1')
@@ -134,24 +136,6 @@ export default {
       this.content = ''
       this.picList = []
       this.$refs.upload.files = []
-    },
-    /**
-     * 图片压缩
-     */
-    processFile (file, next) {
-      compress(file, {
-        compress: {
-          width: 400,
-          height: 400,
-          quality: 0.8
-        }
-      }, next)
-    },
-    /**
-     * 添加base64
-     */
-    fileSubmitted (file) {
-      file.base64Value = file.file.base64
     },
     /**
      * 校验中，显示toast

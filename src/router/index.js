@@ -15,6 +15,11 @@ const Wecircle = (resolve) => {
     resolve(module)
   })
 }
+const Personal = (resolve) => {
+  import('@views/personal/index').then((module) => {
+    resolve(module)
+  })
+}
 Vue.use(Router)
 export default new Router({
   routes: [{
@@ -29,5 +34,8 @@ export default new Router({
   }, {
     path: '/wecircle',
     component: Wecircle
+  }, {
+    path: '/personal',
+    component: Personal
   }]
 })

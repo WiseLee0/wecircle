@@ -1,8 +1,16 @@
 <template>
   <div class="list-card border-bottom-1px"
        @click="closeTip">
+    <div class="avatar"
+         v-show="card.vip === 1">
+      <img :src="card.avatar"
+           class="avatarImg">
+      <img src="./img/avatar.png"
+           class="bgcImg">
+    </div>
     <img :src="card.avatar"
-         class="avatar">
+         class="avatarImg"
+         v-show="card.vip !== 1">
     <div class="container">
       <p class="nickname">{{card.nickname}}</p>
       <p class="content"
@@ -49,12 +57,18 @@
              v-show="card.like.length">
           <i class="cubeic-like"></i>
           <span class="like-nickname"
-                v-for="likeName in card.like"
-                :key="likeName">{{likeName}} </span>
+                v-for="(likeName,index) in card.like"
+                :key="likeName">{{likeName}}<span v-show="card.like.length!==1 && index < card.like.length-1">, </span>
+          </span>
+
         </div>
-        <div class="comment-item border-top-1px">
-          <div class="comment-nickname">随时随地</div>
-          <div>以及上下左右四个边框的绝对 1px 边框的 class</div>
+        <div class="comment-item border-top-1px"
+             v-show="card.comment.length">
+          <div v-for="commentItem in card.comment"
+               :key="commentItem.id">
+            <div class="comment-nickname">{{commentItem.nickname}}</div>
+            <div>{{commentItem.comment}}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -156,7 +170,32 @@ export default {
      * 评论
      */
     onComment () {
-      console.log(456)
+      this.$createDialog({
+        type: 'prompt',
+        title: '',
+        icon: 'cubeic-message',
+        prompt: {
+          value: '',
+          maxlength: 45,
+          placeholder: '请输入短评内容'
+        },
+        confirmBtn: {
+          text: '评论'
+        },
+        onConfirm: (e, comment) => {
+          if (comment.length) {
+            service.post('/comment', {
+              articleId: this.card.id,
+              comment
+            }, this.token)
+            this.set_comment({
+              comment,
+              nickname: this.user.nickname,
+              index: this.index
+            })
+          }
+        }
+      }).show()
       this.closeTip()
     },
     /**
@@ -177,7 +216,8 @@ export default {
     },
     ...mapMutations({
       'set_like': "SET_LIKE",
-      'set_dislike': "SET_DISLIKE"
+      'set_dislike': "SET_DISLIKE",
+      'set_comment': "SET_COMMENT"
     })
   }
 }
@@ -189,10 +229,23 @@ export default {
   padding 15px 10px
   display flex
   flex-direction row
-  .avatar
+  .avatarImg
     width 44px
     height 44px
     border-radius 5px
+  .avatar
+    width 60px
+    height 60px
+    display flex
+    align-items center
+    justify-content center
+    position relative
+    .bgcImg
+      position absolute
+      top -5px
+      left -5px
+      width 70px
+      height 70px
   .container
     flex 1
     padding-left 10px
@@ -282,8 +335,8 @@ export default {
       margin-bottom 5px
       position relative
       .like-content
-        padding-top 3px
-        padding-bottom 3px
+        padding-top 5px
+        padding-bottom 8px
         padding-left 8px
         padding-right 8px
         text-align left

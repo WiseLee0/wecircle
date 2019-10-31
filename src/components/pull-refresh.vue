@@ -20,7 +20,7 @@ export default {
       pullRefresh: {
         dragStart: null, // 开始抓取标志位
         percentage: 0, // 拖动量的百分比
-        dragThreshold: 0.2, // 临界值，
+        dragThreshold: 0.25, // 临界值，
         moveCount: 400, // 位移系数，可以调节圆形图片icon运动的速率
         joinRefreshFlag: null // 进入刷新状态标志位，为了在touchend时有标示可以判断
       }

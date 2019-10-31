@@ -26,7 +26,8 @@
         <div class="name-info">
           <p class="nickname">{{user.nickname}}</p>
           <img class="avatar"
-               :src="user.avatar">
+               :src="user.avatar"
+               @click="toPersonal">
         </div>
         <div v-for="(card,index) in list"
              :key="card.id">
@@ -44,8 +45,9 @@ import headerBar from '@components/header-bar'
 import listCard from '@components/list-card'
 import pullRefresh from '@components/pull-refresh'
 import service from '@utils/service'
-import compress from '@utils/compress'
+import { ImgMixin } from '@utils/mixin'
 export default {
+  mixins: [ImgMixin],
   data () {
     return {
       scrollEvents: ['scroll'],
@@ -92,7 +94,6 @@ export default {
     async getList () {
       const res = await service.get('/publish/article/1')
       this.set_list(res)
-      console.log(this.list)
     },
     /**
      * 发布动态
@@ -107,6 +108,14 @@ export default {
           path: '/login'
         })
       }
+    },
+    /**
+     * 个人中心
+     */
+    toPersonal () {
+      this.$router.push({
+        path: '/personal'
+      })
     },
     /**
     * 滚动事件
@@ -173,24 +182,6 @@ export default {
         time: 1000,
         txt
       }).show()
-    },
-    /**
-     * 图片压缩
-     */
-    processFile (file, next) {
-      compress(file, {
-        compress: {
-          width: 400,
-          height: 400,
-          quality: 0.8
-        }
-      }, next)
-    },
-    /**
-     * 添加base64
-     */
-    fileSubmitted (file) {
-      file.base64Value = file.file.base64
     },
     /**
      * vuex
