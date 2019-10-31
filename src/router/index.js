@@ -20,6 +20,11 @@ const Personal = (resolve) => {
     resolve(module)
   })
 }
+const Personpage = (resolve) => {
+  import('@views/personpage/index').then((module) => {
+    resolve(module)
+  })
+}
 Vue.use(Router)
 export default new Router({
   routes: [{
@@ -37,5 +42,8 @@ export default new Router({
   }, {
     path: '/personal',
     component: Personal
+  }, {
+    path: '/personpage',
+    component: Personpage
   }]
 })

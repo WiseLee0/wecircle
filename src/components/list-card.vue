@@ -10,7 +10,8 @@
     </div>
     <img :src="card.avatar"
          class="avatarImg"
-         v-show="card.vip !== 1">
+         v-show="card.vip !== 1"
+         @click="toPerson(card.nickname,card.uid)">
     <div class="container">
       <p class="nickname">{{card.nickname}}</p>
       <p class="content"
@@ -116,6 +117,18 @@ export default {
   },
   methods: {
     /**
+     * 点击头像后的用户信息
+     */
+    async toPerson (nickname, uid) {
+      if (nickname === this.user.nickname) return
+      const res = await service.get(`/user/${uid}`)
+      if (res.code === 0) this.set_person(res.data)
+      console.log(res.data)
+      this.$router.push({
+        path: '/personpage'
+      })
+    },
+    /**
      * 溢出文字展开收起
      */
     changeOpen () {
@@ -202,6 +215,12 @@ export default {
      * 展开tip
      */
     showTip () {
+      if (!this.token.length) {
+        this.$router.push({
+          path: '/login'
+        })
+        return
+      }
       this.card.like.forEach(item => {
         if (item === this.user.nickname) this.likeFlag = true
         else this.likeFlag = false
@@ -217,7 +236,8 @@ export default {
     ...mapMutations({
       'set_like': "SET_LIKE",
       'set_dislike': "SET_DISLIKE",
-      'set_comment': "SET_COMMENT"
+      'set_comment': "SET_COMMENT",
+      'set_person': "SET_PERSON"
     })
   }
 }

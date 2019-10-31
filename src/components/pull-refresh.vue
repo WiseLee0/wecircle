@@ -114,11 +114,11 @@ export default {
   left 10px
   top 10px
   z-index 99
-.circle-icon-inner
-  width 25px
-  height 25px
-  background-image url('./img/circle.png')
-  background-size cover
+  .circle-icon-inner
+    width 25px
+    height 25px
+    background-image url('./img/circle.png')
+    background-size cover
 .circle-rotate
   animation xuzhuan 0.8s linear infinite
 @keyframes xuzhuan

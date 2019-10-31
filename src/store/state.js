@@ -8,6 +8,7 @@ const state = {
     gender: '男',
     desc: '该用户没有签名呢~'
   }, // 用户信息
-  list: []
+  list: [],
+  person: {}
 }
 export default state

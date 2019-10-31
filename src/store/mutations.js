@@ -41,6 +41,31 @@ const mutations = {
     })
     state.list = list
   },
+  [types.SET_CONCAT_LIST] (state, obj) {
+    const list = obj.article
+    const like = obj.like
+    const comments = obj.comment
+    list.forEach(element => {
+      element.picList = element.picList.split(',')
+      element.created_at = new Date(element.created_at)
+      element.like = []
+      element.comment = []
+      like.forEach(item => {
+        if (element.id === item.articleId) {
+          element.like.push(item.nickname)
+        }
+      })
+      comments.forEach(item => {
+        if (element.id === item.articleId) {
+          element.comment.push({
+            'nickname': item.nickname,
+            'comment': item.comment
+          })
+        }
+      })
+    })
+    state.list = state.list.concat(list)
+  },
   [types.SET_LIKE] (state, obj) {
     state.list[obj.index].like.push(obj.nickname)
   },
@@ -52,6 +77,9 @@ const mutations = {
       'nickname': obj.nickname,
       'comment': obj.comment
     })
+  },
+  [types.SET_PERSON] (state, person) {
+    state.person = person
   },
 }
 export default mutations
