@@ -13,7 +13,6 @@ const mutations = {
     state.user = user
   },
   [types.SET_USER_ATTRIBUTE] (state, { attribute, key }) {
-    console.log(state.user[attribute], key)
     state.user[attribute] = key
   },
   [types.SET_LIST] (state, obj) {

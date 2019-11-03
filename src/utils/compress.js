@@ -14,7 +14,6 @@ function detectVerticalSquash (img) {
   try {
     data = ctx.getImageData(0, 0, 1, ih).data;
   } catch (err) {
-    console.log('Cannot check verticalSquash: CORS?');
     return 1;
   }
   var sy = 0;
@@ -174,7 +173,6 @@ function compress (file, options, callback) {
       if (options.type == 'file') {
         if (/;base64,null/.test(dataURL) || /;base64,$/.test(dataURL)) {
           // 压缩出错，以文件方式上传的，采用原文件上传
-          console.warn('Compress fail, dataURL is ' + dataURL + '. Next will use origin file to upload.');
           callback(file);
         } else {
           let blob = dataURItoBlob(dataURL);
