@@ -210,12 +210,6 @@ export default {
       setTimeout(() => {
         this.$refs.scroll.scrollToElement(this.$refs.bottom, 1000)
       }, 20)
-    },
-    /**
-    * 服务端掉线之后客户端会自动重连，此事件在重连成功时触发
-    */
-    reconnect: function (obj) {
-      console.log(obj)
     }
   },
   beforeDestroy () {
