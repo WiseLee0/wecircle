@@ -10,7 +10,7 @@ module.exports = {
   },
 
   devServer: {
-    proxy: 'http://localhost:9100'
+    proxy: 'http://localhost:8820'
   },
 
   publicPath: process.env.NODE_ENV === 'production' ?

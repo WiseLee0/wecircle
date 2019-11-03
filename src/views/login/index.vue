@@ -126,6 +126,7 @@ export default {
      * 返回主页面
      */
     back () {
+      this.$router.backFlag = true
       this.$router.back()
     },
     /**

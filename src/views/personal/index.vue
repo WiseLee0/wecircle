@@ -56,10 +56,12 @@
         <i class="cubeic-arrow"></i>
       </div>
     </div>
-    <div class="chat personal-row border-bottom-1px border-top-1px">
-      <span>私信</span>
+    <div class="personal-chat personal-row border-bottom-1px border-top-1px"
+         @click="toChatList">
+      <span>我的消息</span>
       <i class="cubeic-arrow"></i>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -172,7 +174,17 @@ export default {
         this.set_list(data)
       }
       this._getUserMsg()
+      this.$router.backFlag = true
       this.$router.back()
+    },
+    /**
+     * 我的私信界面
+     */
+    toChatList () {
+      if (this._toLogin()) return
+      this.$router.push({
+        path: '/personal/chatlist'
+      })
     },
     /**
     * 返回图片地址
@@ -302,7 +314,7 @@ export default {
     position relative
     .desc-label
       min-width 80px
-  .chat
+  .personal-chat
     position relative
     justify-content center
     margin-top 10px

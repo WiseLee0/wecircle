@@ -22,10 +22,12 @@
       <span class="desc-label">个性签名</span>
       <span style="color:#9a9e9e">{{person.desc}}</span>
     </div>
-    <div class="chat personpage-desc border-bottom-1px border-top-1px">
+    <div class="chatMessage personpage-desc border-bottom-1px border-top-1px"
+         @click="toChat">
       <span>发消息</span>
       <i class="cubeic-arrow"></i>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -33,10 +35,11 @@
 import { mapGetters } from 'vuex'
 export default {
   computed: {
-    ...mapGetters(['person'])
+    ...mapGetters(['person', 'token'])
   },
   methods: {
     back () {
+      this.$router.backFlag = true
       this.$router.back()
     },
     showImagePreview () {
@@ -45,6 +48,17 @@ export default {
       this.$createImagePreview({
         imgs: avatar
       }).show()
+    },
+    toChat () {
+      if (!this.token.length) {
+        this.$router.push({
+          path: '/login'
+        })
+        return
+      }
+      this.$router.push({
+        path: '/personpage/chat'
+      })
     }
   }
 }
@@ -114,7 +128,7 @@ export default {
     position relative
     .desc-label
       min-width 80px
-  .chat
+  .chatMessage
     position relative
     justify-content center
     margin-top 10px

@@ -3,12 +3,13 @@
        @click="closeTip">
     <div class="avatar"
          v-show="card.vip === 1">
-      <img :src="card.avatar"
+      <img v-lazy="card.avatar"
            class="avatarImg">
       <img src="./img/avatar.png"
-           class="bgcImg">
+           class="bgcImg"
+           @click="toPerson(card.nickname,card.uid)">
     </div>
-    <img :src="card.avatar"
+    <img v-lazy="card.avatar"
          class="avatarImg"
          v-show="card.vip !== 1"
          @click="toPerson(card.nickname,card.uid)">
@@ -21,7 +22,7 @@
          @click="changeOpen"
          v-show="card.content.length>55">{{overText}}</p>
       <div class="card-img">
-        <img :src="img"
+        <img v-lazy="img"
              v-for="(img, index) in card.picList"
              :key="img"
              @click="handleImgsClick(index)"
@@ -123,7 +124,6 @@ export default {
       if (nickname === this.user.nickname) return
       const res = await service.get(`/user/${uid}`)
       if (res.code === 0) this.set_person(res.data)
-      console.log(res.data)
       this.$router.push({
         path: '/personpage'
       })

@@ -79,6 +79,7 @@ export default {
      * 返回主页面
      */
     cancel () {
+      this.$router.backFlag = true
       this.$router.back()
     },
     /**

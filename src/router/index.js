@@ -25,6 +25,16 @@ const Personpage = (resolve) => {
     resolve(module)
   })
 }
+const Chat = (resolve) => {
+  import('@views/chat/index').then((module) => {
+    resolve(module)
+  })
+}
+const ChatList = (resolve) => {
+  import('@views/chatlist/index').then((module) => {
+    resolve(module)
+  })
+}
 Vue.use(Router)
 export default new Router({
   routes: [{
@@ -41,9 +51,21 @@ export default new Router({
     component: Wecircle
   }, {
     path: '/personal',
-    component: Personal
+    component: Personal,
+    children: [{
+      path: 'chatlist',
+      component: ChatList,
+      children: [{
+        path: 'chat',
+        component: Chat
+      }]
+    }]
   }, {
     path: '/personpage',
-    component: Personpage
+    component: Personpage,
+    children: [{
+      path: 'chat',
+      component: Chat
+    }]
   }]
 })
