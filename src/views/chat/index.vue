@@ -90,9 +90,7 @@ export default {
       await service.post('/message', {
         content: this.content,
         toUser: this.person.id,
-        pic: '',
-        nickname: this.user.nickname,
-        avatar: this.user.avatar
+        pic: ''
       }, this.token)
       this.chats.push({
         isContent: true,

@@ -234,9 +234,9 @@ export default {
   },
   watch: {
     list () {
-      setTimeout(() => {
+      this.$nextTick(() => {
         this.$refs.scroll.refresh()
-      }, 300)
+      })
     },
     getCount (to) {
       if (to === 2) {

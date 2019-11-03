@@ -7,8 +7,8 @@ export const ImgMixin = {
     processFile (file, next) {
       compress(file, {
         compress: {
-          width: 400,
-          height: 400,
+          width: 800,
+          height: 800,
           quality: 0.8
         }
       }, next)

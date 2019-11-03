@@ -12,7 +12,7 @@
         <img v-lazy="item.avatar"
              class="avatar">
         <div class="list-right"
-             @click="toChat(item.toUser)">
+             @click="toChat(item.fromUser,item.toUser)">
           <div class="top">
             <span>{{item.nickname}}</span>
             <span class="time">{{leaveNow(item.updated_at)}}</span>
@@ -32,7 +32,7 @@ import service from '@utils/service'
 import { mapGetters, mapMutations } from 'vuex'
 export default {
   computed: {
-    ...mapGetters(['token'])
+    ...mapGetters(['token', 'user'])
   },
   created () {
     this._getData()
@@ -46,9 +46,23 @@ export default {
     async _getData () {
       const res = await service.get('/chatlist', {
       }, this.token)
-      this.chatlist = res
+      res.forEach(async element => {
+        const uid = this.user.id === element.fromUser ? element.toUser : element.fromUser
+        const result = await service.get(`/user/${uid}`)
+        this.chatlist.push({
+          avatar: result.data.avatar,
+          content: element.content,
+          fromUser: element.fromUser,
+          id: element.id,
+          nickname: result.data.nickname,
+          toUser: element.toUser,
+          created_at: element.created_at,
+          updated_at: element.updated_at
+        })
+      })
     },
-    async toChat (uid) {
+    async toChat (fromUser, toUser) {
+      const uid = this.user.id === fromUser ? toUser : fromUser
       const res = await service.get(`/user/${uid}`)
       this.set_person(res.data)
       this.$router.push({
